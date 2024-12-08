@@ -22,7 +22,6 @@ buffer = {
     'keypoints': [],
     'timestamps': []
 }
-
 @app.route('/process-keypoints', methods=['POST'])
 def process_keypoints():
     global buffer
@@ -39,7 +38,6 @@ def process_keypoints():
         return jsonify({'error': f'Invalid number of keypoints. Expected 225, got {len(keypoints)}'}), 400
 
     try:
-
         # 키포인트 버퍼에 추가
         buffer['keypoints'].append(keypoints)
         buffer['timestamps'].append(timestamp)
@@ -61,8 +59,11 @@ def process_keypoints():
             predictions = model.predict(batch_keypoints_np)
             predicted_labels = [label_names[np.argmax(pred)] for pred in predictions]
 
+            # 중복 제거
+            unique_labels = remove_consecutive_duplicates(predicted_labels)
+
             # Gemini를 활용한 문장 생성
-            final_sentence = generate_sentence(predicted_labels)
+            final_sentence = generate_sentence(unique_labels)
 
             # 응답 데이터: 마지막 타임스탬프
             response = {
@@ -79,6 +80,18 @@ def process_keypoints():
     except Exception as e:
         print(f"Error processing keypoints: {e}")
         return jsonify({'error': 'Internal server error'}), 500
+
+def remove_consecutive_duplicates(labels):
+    """
+    연속적으로 중복된 단어를 제거합니다.
+    """
+    unique_labels = []
+    prev_label = None
+    for label in labels:
+        if label != prev_label:
+            unique_labels.append(label)
+            prev_label = label
+    return unique_labels
 
 def generate_sentence(predicted_labels):
     try:
