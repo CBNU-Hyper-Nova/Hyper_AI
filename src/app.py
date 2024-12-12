@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)  # 프론트엔드에서의 요청을 허용
 
 # Gemini API 설정
-genai.configure(api_key='AIzaSyAUaZsX4BtikFIh9dM7pJW53Bvl0Z-LcOM')  # 실제 API 키로 대체
+genai.configure(api_key='')  # 실제 API 키로 대체
 
 # 커스텀 레이어 정의
 class GetItem(Layer):
